@@ -24,7 +24,7 @@ assets = Path(__file__).resolve().parent / "component"
 page = (assets / "index.html").read_text(encoding="utf-8")
 styles = (assets / "style.css").read_text(encoding="utf-8")
 page = page.replace('<link rel="stylesheet" href="./style.css">', f"<style>{styles}</style>")
-for filename in ("scene.js", "app.js"):
+for filename in ("depth.js", "scene.js", "app.js"):
     script = (assets / filename).read_text(encoding="utf-8")
     page = page.replace(f'<script src="./{filename}"></script>', f"<script>{script}</script>")
 for image in (assets / "media").glob("*.webp"):

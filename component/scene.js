@@ -6,9 +6,11 @@ const GEOMETRY = {
   heights: Array.from({ length: 6 }, (_, index) => .53 + .548 * index),
   posts: [-4.39, -2.195, 0, 2.195, 4.39],
   cylinders: [-3.72, -1.24, 1.24, 3.72],
-  plateBase: .138,
+  plateBase: .126,
   plateThickness: .1,
 };
+const roofBeamHeight = .105;
+const rackTop = GEOMETRY.heights.at(-1) + GEOMETRY.plateBase + GEOMETRY.plateThickness + .20 + roofBeamHeight / 2;
 
 const colors = {
   rack: [85, 102, 114],
@@ -19,6 +21,7 @@ const colors = {
   steel: [188, 203, 213],
   piston: [169, 193, 207],
   hoist: [133, 147, 152],
+  cable: [185, 204, 214],
   marker: [233, 177, 90],
 };
 
@@ -66,35 +69,35 @@ function addCylinder(mesh, x, y, bottom, top, radius, material) {
 
 function addRack(mesh, x) {
   const { heights, posts } = GEOMETRY;
-  const sections = [0, ...heights, 3.505];
+  const roof = rackTop - roofBeamHeight / 2;
   for (const post of posts) {
     for (const y of [-1.03, 1.03]) {
       addBox(mesh, x + post, y, .038, .31, .31, .076, "rail");
-      for (let index = 1; index < sections.length; index++) {
-        const bottom = sections[index - 1], top = sections[index];
-        addBox(mesh, x + post, y, (bottom + top) / 2, .15, .15, top - bottom, "rack");
-      }
+      addBox(mesh, x + post, y, rackTop / 2, .15, .15, rackTop, "rack");
     }
-    addBox(mesh, x + post, 0, 3.43, .12, 2.08, .105, "rack");
+    addBox(mesh, x + post, 0, roof, .12, 2.08, roofBeamHeight, "rack");
   }
-  for (const z of [...heights, 3.50]) {
+  for (const y of [-.98, .98]) {
+    addBox(mesh, x, y, roof, 8.92, .105, roofBeamHeight, "rack");
+  }
+  for (const z of heights) {
     for (const y of [-.98, .98]) {
       addBox(mesh, x, y, z - .11, 8.92, .105, .15, "rack");
     }
     for (const y of [-.68, .68]) {
-      addBox(mesh, x, y, z - .071, 8.72, .12, .13, "rail");
+      addBox(mesh, x, y, z - .065, 8.72, .12, .13, "rail");
     }
   }
 }
 
-function addTray(mesh, x, z, selected, loaded) {
+function addTray(mesh, x, z, selected) {
   const material = selected ? "selected" : "tray";
+  const height = GEOMETRY.plateBase;
   for (const y of [-.673, .673]) {
-    addBox(mesh, x, y, z + .063, 8.43, .09, .126, material);
+    addBox(mesh, x, y, z + height / 2, 8.43, .09, height, material);
   }
   for (let index = -4; index <= 4; index++) {
-    if (loaded && Math.abs(index) < 4) continue;
-    addBox(mesh, x + index * 1.035, 0, z + .078, .10, 1.3, .083, material);
+    addBox(mesh, x + index * 1.035, 0, z + height - .083 / 2, .10, 1.3, .083, material);
   }
   if (selected) {
     for (const offset of [-4.08, 4.08]) {
@@ -125,8 +128,21 @@ function addLift(mesh, z) {
     addBox(mesh, (index - 3) * 1.47, 0, z - .142, .13, 1.61, .12, "lift");
   }
   for (const y of [-.675, .675]) {
-    addBox(mesh, 0, y, z - .059, 8.99, .103, .116, "rail");
+    addBox(mesh, 0, y, z - .058, 8.99, .103, .116, "rail");
   }
+}
+
+// Ribbon in the X/Z plane, visible from the front of the machine.
+function addCable(mesh, x1, z1, x2, z2, y) {
+  const length = Math.hypot(x2 - x1, z2 - z1);
+  const dx = .035 * (z2 - z1) / length;
+  const dz = .035 * (x1 - x2) / length;
+  mesh.push({
+    points: [[x1 + dx, y, z1 + dz], [x1 - dx, y, z1 - dz],
+      [x2 - dx, y, z2 - dz], [x2 + dx, y, z2 + dz]],
+    normal: [0, -1, 0],
+    material: "cable",
+  });
 }
 
 function addSpreader(mesh, y, z) {
@@ -137,19 +153,21 @@ function addSpreader(mesh, y, z) {
       addBox(mesh, x, y + dy, z + .232, .051, .051, .34, "piston");
       addBox(mesh, x, y + dy, z + .035, .38, .24, .07, "hoist");
     }
+    addCable(mesh, x, z + .591, 0, z + 1.54, y);
   }
+  addCable(mesh, 0, z + 1.54, 0, z + 16, y);
 }
 
 const fixedMesh = [];
 for (const x of Object.values(GEOMETRY.rackX)) addRack(fixedMesh, x);
 
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-const shade = (rgb, light) => `rgb(${rgb.map(value => Math.round(Math.min(value * light, 255))).join(",")})`;
 
 class Scene {
   constructor(canvas) {
     this.canvas = canvas;
     this.context = canvas.getContext("2d");
+    this.meshRenderer = new DepthRenderer();
     this.setView("perspective");
   }
 
@@ -183,8 +201,15 @@ class Scene {
     const depth = [sy * ce, -cy * ce, se];
     const right = [cy, sy, 0];
     const up = [-sy * se, cy * se, ce];
-    const scale = Math.min(width / 30.8, height / 9.3);
-    const origin = [width / 2, height * .52 + scale * 1.55];
+    // Keep the whole rack in view when its length projects diagonally across the screen.
+    const rackHalfLength = GEOMETRY.rackX.right + 4.55;
+    const groundExtent = rackHalfLength * Math.abs(up[0]) + 1.20 * Math.abs(up[1]);
+    const topExtent = groundExtent + rackTop * ce;
+    const scale = Math.min(width / 30.8, height / 9.3, (height - 64) / (groundExtent + topExtent));
+    const originY = Math.max(20 + topExtent * scale, Math.min(
+      height - 44 - groundExtent * scale, height * .52 + scale * 1.55,
+    ));
+    const origin = [width / 2, originY];
     const project = point => [
       origin[0] + dot(point, right) * scale,
       origin[1] - dot(point, up) * scale,
@@ -220,43 +245,33 @@ class Scene {
         const isMoving = state.target?.side === side && state.target.index === index;
         if (isMoving) continue;
         const highlighted = state.highlight?.side === side && state.highlight.index === index;
-        addTray(mesh, x, z, highlighted, state.stock[side][index]);
+        addTray(mesh, x, z, highlighted);
         if (state.stock[side][index]) addPlate(mesh, x, 0, z);
       }
     }
     addLift(mesh, state.liftZ);
     if (state.target) {
-      addTray(mesh, state.trayX, state.levelZ, true, state.boardVisible && state.boardLift < .04);
+      addTray(mesh, state.trayX, state.levelZ, true);
       if (state.boardVisible) addPlate(mesh, state.boardX, state.boardY, state.levelZ + state.boardLift);
     }
     if (state.crane) addSpreader(mesh, state.boardY, state.craneZ);
 
-    const faces = mesh.filter(face => dot(depth, face.normal) > .001).map(face => ({
-      ...face,
-      depth: face.points.reduce((sum, point) => sum + dot(point, depth), 0) / face.points.length,
-    }));
-    faces.sort((a, b) => a.depth - b.depth);
-    for (const { points, normal, material } of faces) {
-      ctx.beginPath();
-      for (const [index, point] of points.entries()) {
+    const meshRatio = Math.max(ratio, 1.5);
+    this.meshRenderer.begin(Math.round(width * meshRatio), Math.round(height * meshRatio));
+    for (const { points, normal, material } of mesh) {
+      if (dot(depth, normal) <= .001) continue;
+      const projected = points.map(point => {
         const [x, y] = project(point);
-        if (index === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        return [x * meshRatio, y * meshRatio, dot(point, depth)];
+      });
+      const light = .70 + .37 * Math.max(0, dot(normal, [-.35, -.46, .82]));
+      const color = colors[material].map(value => value * light);
+      for (let index = 1; index < projected.length - 1; index++) {
+        this.meshRenderer.triangle(projected[0], projected[index], projected[index + 1], color);
       }
-      ctx.closePath();
-      const light = .77 + .29 * Math.max(0, dot(normal, [-.35, -.46, .82]));
-      ctx.fillStyle = shade(colors[material], light);
-      ctx.fill();
-      ctx.strokeStyle = material === "steel" ? "#dce6ec8c" : "#0b162457";
-      ctx.lineWidth = material === "steel" ? .7 : .65;
-      ctx.stroke();
     }
+    this.meshRenderer.draw(ctx, width, height);
 
-    if (state.crane) {
-      const y = state.boardY, z = state.craneZ;
-      polyline([[-2.68, y, z + .6], [0, y, z + 1.54], [2.68, y, z + .6]], "#acbeca", 1.3);
-      polyline([[0, y, z + 1.54], [0, y, z + 8]], "#acbeca", 1.3);
-    }
     if (state.alignGuide) {
       const x = Math.sign(rackX[state.target.side]);
       ctx.setLineDash([5, 5]);
@@ -272,7 +287,7 @@ class Scene {
     ctx.font = `${width < 470 ? 12 : 14}px "Microsoft YaHei", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const labelY = Math.min(height - 23, origin[1] + scale * (1.62 + Math.abs(up[0]) * 8) + 12);
+    const labelY = originY + groundExtent * scale + 17;
     for (const [x, label] of labels) {
       const [sx] = project([x, 0, 0]);
       const emphasized = state.target && rackX[state.target.side] === x;
