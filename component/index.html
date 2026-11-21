@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>板材存放库 | Plate Storage System</title>
-  <meta name="description" content="面向钢板等大型板材的分层存放系统。了解货架布局、中央液压工位和取板流程，在线操作三维演示。">
+  <meta name="description" content="面向钢板等大型板材的分层存放系统。了解货架布局和中央液压工位，在线演示取出和放入钢板。">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -28,8 +28,8 @@
           <div class="hero-copy">
             <p class="product-name" lang="en">PLATE STORAGE SYSTEM</p>
             <h1 id="product-title">板材存放库</h1>
-            <p class="hero-lead">分层存放，集中取板</p>
-            <p class="hero-description">大型板材在两侧货架分层平放。中央液压升降架对接目标层，接收活动架，再由行车从中央工位吊取板材。</p>
+            <p class="hero-lead">分层存放，集中取放</p>
+            <p class="hero-description">大型板材在两侧货架分层平放。中央液压升降架对接目标层，行车在同一工位吊出或放入钢板。</p>
             <a class="primary-link" href="#demo">操作三维演示</a>
           </div>
           <figure class="hero-image">
@@ -39,7 +39,7 @@
         <dl class="shell specs" aria-label="演示设备布局">
           <div><dt>固定货架</dt><dd>左右两组</dd></div>
           <div><dt>存放层位</dt><dd>每侧 6 层</dd></div>
-          <div><dt>取板工位</dt><dd>共用中央升降架</dd></div>
+          <div><dt>取放工位</dt><dd>共用中央升降架</dd></div>
         </dl>
       </section>
 
@@ -61,7 +61,7 @@
               </div>
               <div>
                 <dt>活动架</dt>
-                <dd>板材平放在活动架上。取板时整架横移到中央，吊板后空架回到原层。</dd>
+                <dd>活动架在货架和中央工位之间横移。取出钢板后空架归层，放入钢板后带板归层。</dd>
               </div>
               <div>
                 <dt>液压升降架</dt>
@@ -75,8 +75,8 @@
       <section class="demo-section" id="demo" aria-labelledby="demo-title">
         <div class="shell">
           <div class="section-heading">
-            <h2 id="demo-title">交互取板演示</h2>
-            <p>先选货架，再点任意有板层位。你可以暂停动作，或拖动模型查看不同角度。</p>
+            <h2 id="demo-title">钢板取放演示</h2>
+            <p>选择取出或放入钢板，再选择货架和层位。你可以暂停动作，或拖动模型改变视角。</p>
           </div>
           <div class="workspace">
             <section class="viewer" aria-labelledby="viewer-heading">
@@ -103,23 +103,27 @@
 
             <section class="panel" aria-labelledby="controls-heading">
               <div class="panel-heading">
-                <h2 id="controls-heading">取板控制</h2>
+                <h2 id="controls-heading">取放板控制</h2>
                 <span id="remaining" class="remaining"></span>
+              </div>
+              <div class="mode-picker" role="group" aria-label="作业方式">
+                <button type="button" data-mode="take" aria-pressed="true">取出钢板</button>
+                <button type="button" data-mode="place" aria-pressed="false">放入钢板</button>
               </div>
               <div class="sides" role="group" aria-label="货架">
                 <button type="button" data-side="left" aria-pressed="true">左侧货架</button>
                 <button type="button" data-side="right" aria-pressed="false">右侧货架</button>
               </div>
-              <p class="field-hint">层位由下往上编号，点选即开始取板。</p>
-              <div id="levels" class="levels" role="group" aria-label="选择取板层位"></div>
+              <p class="field-hint" id="field-hint"></p>
+              <div id="levels" class="levels" role="group" aria-label="选择作业层位"></div>
 
               <div class="operation">
                 <div class="status-line" role="status" aria-live="polite">
                   <span class="status-dot" id="status-dot"></span>
                   <strong id="status">等待选层</strong>
                 </div>
-                <p class="detail" id="detail">选择一层后，设备开始自动演示。</p>
-                <progress id="progress" value="0" aria-label="本次取板进度"></progress>
+                <p class="detail" id="detail"></p>
+                <progress id="progress" value="0" aria-label="本次作业进度"></progress>
               </div>
               <div class="actions">
                 <button type="button" id="pause" disabled>暂停演示</button>
@@ -130,14 +134,14 @@
           <section class="process" aria-labelledby="process-heading">
             <h2 id="process-heading">取板流程</h2>
             <ol id="steps">
-              <li><span>升降对层</span><small>承托面与目标层齐平</small></li>
-              <li><span>带板横移</span><small>板材随活动架进入中央</small></li>
-              <li><span>行车吊板</span><small>吊走板材，留下活动架</small></li>
-              <li><span>空架归层</span><small>空活动架返回原层</small></li>
-              <li><span>平台复位</span><small>升降架回到起始高度</small></li>
+              <li><span></span><small></small></li>
+              <li><span></span><small></small></li>
+              <li><span></span><small></small></li>
+              <li><span></span><small></small></li>
+              <li><span></span><small></small></li>
             </ol>
           </section>
-          <p class="demo-note">三维模型用于说明设备结构和取板原理。</p>
+          <p class="demo-note">三维模型用于说明设备结构和取放原理。</p>
         </div>
       </section>
     </main>
