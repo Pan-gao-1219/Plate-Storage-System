@@ -1,6 +1,7 @@
 "use strict";
 
 const alignEnd = 1.8, transferEnd = 4.1, craneEnd = 7.3, returnEnd = 9.25, cycleEnd = 10.7;
+const liftOff = 5.15, setDown = 6.23;
 const stepEnds = [alignEnd, transferEnd, craneEnd, returnEnd, cycleEnd];
 const alignStep = ["升降对层", "中央升降架对齐目标层。"];
 const resetStep = ["平台复位", "升降架回到起始高度。"];
@@ -9,7 +10,7 @@ const modes = {
     title: "取板",
     steps: [
       alignStep,
-      ["带板横移", "活动架带板移到中央。"],
+      ["带板横移", "钢板随活动架滑上中央滚轮。"],
       ["行车吊出", "行车吊走板材，活动架留在中央。"],
       ["空架归层", "空活动架返回原层。"],
       resetStep,
@@ -19,7 +20,7 @@ const modes = {
     title: "放板",
     steps: [
       alignStep,
-      ["空架横移", "空活动架移到中央。"],
+      ["空架横移", "空活动架滑上中央滚轮。"],
       ["行车放板", "行车将板材放到活动架上，吊具抬起。"],
       ["带板归层", "活动架带板返回目标层。"],
       resetStep,
@@ -73,12 +74,13 @@ function readScene() {
   const returnTray = smooth(time, craneEnd, returnEnd);
   const trayX = sourceX * (1 - transfer + returnTray);
   const craneTravel = placing ? 1 - smooth(time, transferEnd, 5.2) : smooth(time, 6.18, craneEnd);
-  const boardLift = 6.6 * craneTravel + 2.4 * (
-    placing ? 1 - smooth(time, 5.16, 6.23) : smooth(time, 5.15, 6.18)
+  const onTray = placing ? time >= setDown : time <= liftOff;
+  const boardLift = onTray ? 0 : 6.6 * craneTravel + 2.4 * (
+    placing ? 1 - smooth(time, 5.16, setDown) : smooth(time, liftOff, 6.18)
   );
   const hoistClearance = placing
     ? 10.4 * smooth(time, 6.38, craneEnd)
-    : 5.5 * (1 - smooth(time, transferEnd, 5.08));
+    : 7.2 * (1 - smooth(time, transferEnd + .18, 5.08));
   const liftTravel = (levelZ - base.liftZ) * smooth(time, 0, 1.56);
   return {
     ...base,
@@ -86,8 +88,8 @@ function readScene() {
     levelZ,
     liftZ: base.liftZ + liftTravel * (1 - smooth(time, returnEnd, cycleEnd)),
     trayX,
-    boardX: placing ? sourceX * returnTray : sourceX * (1 - transfer),
-    boardY: 9 * craneTravel,
+    boardX: onTray ? trayX : 0,
+    boardY: onTray ? 0 : 9 * craneTravel,
     boardLift,
     boardVisible: placing ? time >= transferEnd : time < craneEnd,
     crane: time >= transferEnd && time < craneEnd,

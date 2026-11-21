@@ -6,7 +6,7 @@ const GEOMETRY = {
   heights: Array.from({ length: 6 }, (_, index) => .53 + .548 * index),
   posts: [-4.39, -2.195, 0, 2.195, 4.39],
   cylinders: [-3.72, -1.24, 1.24, 3.72],
-  plateBase: .126,
+  plateBase: .16,
   plateThickness: .1,
 };
 const roofBeamHeight = .105;
@@ -20,6 +20,7 @@ const colors = {
   lift: [137, 156, 163],
   steel: [188, 203, 213],
   piston: [169, 193, 207],
+  roller: [152, 170, 180],
   hoist: [133, 147, 152],
   cable: [185, 204, 214],
   marker: [233, 177, 90],
@@ -55,6 +56,7 @@ function addCylinder(mesh, x, y, bottom, top, radius, material) {
   });
   const lower = ring.map(([dx, dy]) => [x + radius * dx, y + radius * dy, bottom]);
   const upper = lower.map(([px, py]) => [px, py, top]);
+  mesh.push({ points: lower, normal: [0, 0, -1], material });
   mesh.push({ points: upper, normal: [0, 0, 1], material });
   for (let index = 0; index < ring.length; index++) {
     const next = (index + 1) % ring.length;
@@ -111,6 +113,24 @@ function addPlate(mesh, x, y, base) {
   addBox(mesh, x, y, base + plateBase + plateThickness / 2, 8.04, 1.29, plateThickness, "steel");
 }
 
+function addReceiverRollers(mesh, y, z) {
+  const radius = .063;
+  const wheel = [];
+  addCylinder(wheel, 0, 0, -.054, .054, radius, "roller");
+  for (const x of [-4.22, -3.62, -3.24, -2.56, -1.85, -1.08, -.42, .42, 1.08, 1.85, 2.56, 3.24, 3.62, 4.22]) {
+    for (const { points, normal, material } of wheel) {
+      mesh.push({
+        points: points.map(([px, py, pz]) => [x + px, y + pz, z - radius - py]),
+        normal: [normal[0], normal[2], -normal[1]],
+        material,
+      });
+    }
+    for (const offset of [-.068, .068]) {
+      addBox(mesh, x, y + offset, z - .099, .080, .024, .080, "lift");
+    }
+  }
+}
+
 function addLift(mesh, z) {
   for (const x of GEOMETRY.cylinders) {
     addBox(mesh, x, 0, .039, .51, .51, .078, "rail");
@@ -119,7 +139,7 @@ function addLift(mesh, z) {
     addBox(mesh, x, 0, z - .192, .26, .31, .103, "rack");
   }
   for (const y of [-.84, .84]) {
-    addBox(mesh, 0, y, z - .129, 9.08, .13, .19, "lift");
+    addBox(mesh, 0, y, z - .158, 9.08, .13, .18, "lift");
     for (const x of [-4.28, 4.28]) {
       addBox(mesh, x, y + Math.sign(y) * .069, z - .109, .30, .015, .069, "marker");
     }
@@ -128,7 +148,9 @@ function addLift(mesh, z) {
     addBox(mesh, (index - 3) * 1.47, 0, z - .142, .13, 1.61, .12, "lift");
   }
   for (const y of [-.675, .675]) {
-    addBox(mesh, 0, y, z - .058, 8.99, .103, .116, "rail");
+    // The wheel crowns meet the tray underside. The backing rails sit below it.
+    addBox(mesh, 0, y, z - .174, 8.99, .16, .078, "rail");
+    addReceiverRollers(mesh, y, z);
   }
 }
 
