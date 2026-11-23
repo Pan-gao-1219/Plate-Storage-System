@@ -308,6 +308,26 @@ for (const link of document.querySelectorAll('a[href^="#"]')) {
 
 if (isProfile) showProfilePreviews(stock);
 
+const galleryCaption = document.querySelector(".gallery-caption");
+const galleryButtons = document.querySelectorAll("[data-gallery]");
+const galleryImages = document.querySelectorAll(".hero-media [data-pose]");
+const galleryCopy = isProfile
+  ? { overview: "五层型材架与架外支承", lift: "行车在架外整体吊起活动架与型材" }
+  : { overview: "两侧固定货架与中央升降架", lift: "行车吊起钢板，活动架留在中央工位" };
+
+function selectGalleryPose(pose) {
+  for (const image of galleryImages) image.hidden = image.dataset.pose !== pose;
+  for (const button of galleryButtons) {
+    button.setAttribute("aria-pressed", String(button.dataset.gallery === pose));
+  }
+  galleryCaption.textContent = galleryCopy[pose];
+}
+
+for (const button of galleryButtons) {
+  button.addEventListener("click", () => selectGalleryPose(button.dataset.gallery));
+}
+selectGalleryPose("overview");
+
 // Fit the Streamlit iframe to its content when the host permits same-origin access.
 const hostFrame = window.frameElement;
 if (hostFrame) {
@@ -317,6 +337,7 @@ if (hostFrame) {
     if (hostFrame.style.height !== height) hostFrame.style.height = height;
   };
   fitFrame();
+  hostFrame.scrolling = "no";
   new ResizeObserver(fitFrame).observe(page);
 }
 updateUI();

@@ -13,57 +13,40 @@
       <section class="hero" aria-labelledby="product-title">
         <div class="shell hero-inner">
           <div class="hero-copy">
-            <p class="product-name" lang="en">PLATE STORAGE SYSTEM</p>
             <h1 id="product-title">板材存放库</h1>
-            <p class="hero-lead">分层存放，集中取放</p>
-            <p class="hero-description">大型板材在两侧货架分层平放。中央液压升降架对接目标层，行车在同一工位吊出或放入钢板。</p>
-            <a class="primary-link" href="#demo">操作三维演示</a>
+            <p class="product-name" lang="en">Plate Storage System</p>
+            <p class="hero-description">钢板在两侧分层平放，中央液压架与选定层位对齐，让行车在同一工位取板、放板。</p>
+            <div class="hero-actions">
+              <a class="primary-link" href="#demo"><i class="play-icon" aria-hidden="true"></i>操作三维演示</a>
+              <a class="detail-link" href="#system">查看结构</a>
+            </div>
           </div>
           <figure class="hero-image">
-            <img src="./media/storage-system.webp" width="1440" height="630" alt="设备斜视全景，两侧分层货架之间是中央液压升降架">
+            <div class="hero-media" id="equipment-gallery">
+              <img data-pose="overview" src="./media/storage-system.webp" width="1440" height="630" alt="左右两组货架与中央液压升降架的整机布局">
+              <img data-pose="lift" src="./media/lifting-station.webp" width="1120" height="624" alt="钢板吊起后，活动架留在中央升降架上" hidden>
+            </div>
+            <figcaption class="gallery-bar">
+              <span class="gallery-caption" aria-live="polite">左右货架与中央工位</span>
+              <span class="gallery-controls" role="group" aria-label="设备图集">
+                <button type="button" data-gallery="overview" aria-controls="equipment-gallery" aria-pressed="true">整机</button>
+                <button type="button" data-gallery="lift" aria-controls="equipment-gallery" aria-pressed="false">吊装</button>
+              </span>
+            </figcaption>
           </figure>
         </div>
         <dl class="shell specs" aria-label="演示设备布局">
           <div><dt>固定货架</dt><dd>左右两组</dd></div>
           <div><dt>存放层位</dt><dd>每侧 6 层</dd></div>
-          <div><dt>取放工位</dt><dd>共用中央升降架</dd></div>
+          <div><dt>取放工位</dt><dd>中央升降架</dd></div>
         </dl>
-      </section>
-
-      <section class="system-section" id="system" aria-labelledby="system-title">
-        <div class="shell">
-          <div class="section-heading">
-            <h2 id="system-title">系统结构</h2>
-            <p>三类构件协同工作，让不同层位的板材汇入同一吊装工位。</p>
-          </div>
-          <div class="system-layout">
-            <figure class="system-image">
-              <img src="./media/lifting-station.webp" width="1120" height="624" alt="行车吊起板材，蓝色活动架留在中央升降架上">
-              <figcaption>中央工位 · 板材离开活动架</figcaption>
-            </figure>
-            <dl class="components">
-              <div>
-                <dt>固定架</dt>
-                <dd>在设备两侧支承各层活动架，为板材提供独立存放层位。</dd>
-              </div>
-              <div>
-                <dt>活动架</dt>
-                <dd>活动架在货架和中央工位之间横移。取出钢板后空架归层，放入钢板后带板归层。</dd>
-              </div>
-              <div>
-                <dt>液压升降架</dt>
-                <dd>按目标层高度对齐承托面，在同一工位接收左侧或右侧的板材。</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
       </section>
 
       <section class="demo-section" id="demo" aria-labelledby="demo-title">
         <div class="shell">
           <div class="section-heading">
             <h2 id="demo-title">钢板取放演示</h2>
-            <p>选择取出或放入钢板，再选择货架和层位。你可以暂停动作，或拖动模型改变视角。</p>
+            <p>选好取放方式和货架，点选层位即可开始。拖动模型可查看交接细节。</p>
           </div>
           <div class="workspace">
             <section class="viewer" aria-labelledby="viewer-heading">
@@ -131,10 +114,30 @@
           <p class="demo-note">三维模型用于说明设备结构和取放原理。</p>
         </div>
       </section>
+
+      <section class="system-section" id="system" aria-labelledby="system-title">
+        <div class="shell">
+          <div class="section-heading">
+            <h2 id="system-title">系统结构</h2>
+            <p>从货架到中央工位，钢板始终由活动架承托，直到行车起吊。</p>
+          </div>
+          <div class="system-layout">
+            <figure class="system-image">
+              <img src="./media/tray-handoff.webp" width="1100" height="565" alt="蓝灰色活动架从固定架移出，前端搭上中央升降架">
+              <figcaption>活动架前端与中央工位对接</figcaption>
+            </figure>
+            <dl class="components">
+              <div><dt>固定架</dt><dd>左右货架分别支承六层活动架，让钢板分层平放。</dd></div>
+              <div><dt>活动架</dt><dd>承托钢板横移至中央工位。取板后空架归层，放板后带板归层。</dd></div>
+              <div><dt>液压升降架</dt><dd>升降至目标层，让中央滚轮与货架上的活动架对齐。</dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
     </main>
     <footer class="footer">
       <div class="shell footer-inner">
-        <span>板材存放库 <span class="footer-english" lang="en">Plate Storage System</span></span>
+        <span><strong class="footer-name">板材存放库</strong> <span class="footer-english" lang="en">Plate Storage System</span></span>
         <a href="#top">返回顶部</a>
       </div>
     </footer>

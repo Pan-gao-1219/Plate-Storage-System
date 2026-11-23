@@ -149,8 +149,18 @@ const profileView = {
 };
 
 class ProfileScene extends Scene {
-  constructor(canvas) {
-    super(canvas, profileView);
+  constructor(canvas, preview = "") {
+    super(canvas, preview ? {
+      ...profileView,
+      widthSpan: preview === "overview" ? 23.9 : 26.1,
+      height: preview === "overview" ? 4.9 : 6.9,
+      heightSpan: 8.4,
+    } : profileView);
+    this.preview = preview;
+    if (preview) {
+      this.yaw = -.36;
+      this.elevation = .38;
+    }
   }
 
   buildMesh(state) {
@@ -171,6 +181,7 @@ class ProfileScene extends Scene {
   }
 
   labels(state) {
+    if (this.preview) return [];
     return [
       [profileGeometry.stationX, "架外吊装工位",
         !!state.target && state.target.time >= profileStepEnds[1] && state.target.time <= profileStepEnds[3]],
@@ -181,36 +192,38 @@ class ProfileScene extends Scene {
 
 function showProfilePreviews(stock) {
   const copy = {
-    ".product-name": "PROFILE STORAGE SYSTEM",
+    ".product-name": "Profile Storage System",
     "#product-title": "型材库",
-    ".hero-lead": "长料分层，架外吊装",
-    ".hero-description": "长型材存放在独立活动架上。选层后，活动架沿长度方向移出货架，在架外完成吊装与装卸。",
-    "#system-title + p": "固定大梁和滚轮承托活动架，架外工位留出吊装空间。",
-    ".system-image figcaption": "第三层载料架完全伸出后的吊装示意",
+    ".hero-description": "长型材分层存放在独立活动架上。取料时，整架沿型材长度方向移出，在货架外起吊。",
+    "#system-title + p": "滚轮支承活动架横移，架外支承接住整架型材，为吊装留出空间。",
+    ".system-image figcaption": "第三层活动架移出，型材由架外工位承托",
     "#demo-title": "型材取放演示",
-    "#demo-title + p": "选择取出或放入型材，再点选层位。可暂停查看侧向转运和架外吊装。",
+    "#demo-title + p": "选择取料或放料，再点选层位，观察活动架如何移出和归层。",
     "#controls-heading": "型材取放控制",
     '[data-mode="take"]': "取出型材",
     '[data-mode="place"]': "放入型材",
-    ".demo-note": "演示按吊索连接活动架处理，型材随架起吊。架外装卸用一次往返表示。",
-    ".footer-inner > span": "型材库 · Profile Storage System",
+    ".demo-note": "演示中，吊索连接活动架，架外装卸以行车往返示意。",
+    ".footer-name": "型材库",
+    ".footer-english": "Profile Storage System",
   };
   for (const [selector, text] of Object.entries(copy)) {
     document.querySelector(selector).textContent = text;
   }
   const specs = [
-    ["存放层位", "五层活动架"],
-    ["转运方向", "沿长度方向侧移"],
-    ["取放工位", "架外吊装"],
+    ["存放层位", "5 层"],
+    ["转运方向", "纵向移出"],
+    ["吊装位置", "货架外侧"],
   ];
   const components = [
-    ["立柱与大梁", "固定立柱支承各层大梁。活动架沿滚轮承托的通道进出。"],
-    ["活动架", "独立承托一组长型材。带料或空架均可沿货架长度方向横移。"],
-    ["架外吊装", "活动架离开固定架后，行车通过吊索起吊，再将活动架送回。"],
+    ["固定架", "立柱和大梁支承五层滚道，供活动架进出。"],
+    ["活动架", "每层独立承托一组长型材，可带料移出，也可空架归层。"],
+    ["架外支承", "活动架移出后在这里停稳，行车随后将整架吊起。"],
   ];
   for (const [selector, rows] of [[".specs", specs], [".components", components]]) {
     for (const [index, row] of [...document.querySelectorAll(selector + " > div")].entries()) {
-      [row.firstElementChild.textContent, row.lastElementChild.textContent] = rows[index];
+      const [name, value] = rows[index];
+      row.querySelector("dt").textContent = name;
+      row.querySelector("dd").textContent = value;
     }
   }
   document.getElementById("scene").setAttribute("aria-label", "五层型材架和左侧架外吊装工位。可拖动旋转视角。");
@@ -219,17 +232,23 @@ function showProfilePreviews(stock) {
   legend[2].innerHTML = '<i class="profile-stand"></i>架外支承';
   legend[3].innerHTML = '<i class="plate"></i>型材';
 
-  for (const [selector, time, label] of [
-    [".hero-image img", 3.3, "五层型材库与伸出的第三层活动架"],
-    [".system-image img", 5.42, "第三层活动架在架外与型材一起起吊"],
+  for (const [selector, preview, time, label] of [
+    ['.hero-media [data-pose="overview"]', "overview", 0, "右侧五层型材架与左侧架外支承"],
+    ['.hero-media [data-pose="lift"]', "lift", 5.42, "行车在货架外将第三层活动架和型材一并吊起"],
+    [".system-image img", "transfer", 4.08, "第三层装有型材的活动架完全移至架外支承"],
   ]) {
+    const image = document.querySelector(selector);
     const canvas = document.createElement("canvas");
     canvas.className = "profile-preview";
+    canvas.hidden = image.hidden;
+    if (image.dataset.pose) canvas.dataset.pose = image.dataset.pose;
+    if (image.id) canvas.id = image.id;
     canvas.setAttribute("role", "img");
     canvas.setAttribute("aria-label", label);
-    document.querySelector(selector).replaceWith(canvas);
-    const view = new ProfileScene(canvas);
-    const pose = readProfileScene(stock, { side: "rack", index: 2, time, mode: "take" }, null);
-    new ResizeObserver(() => view.render(pose)).observe(canvas);
+    image.replaceWith(canvas);
+    const view = new ProfileScene(canvas, preview);
+    const job = preview === "overview" ? null : { side: "rack", index: 2, time, mode: "take" };
+    const state = readProfileScene(stock, job, null);
+    new ResizeObserver(() => view.render(state)).observe(canvas);
   }
 }

@@ -1,49 +1,33 @@
 <style>
   [data-testid="stMarkdownContainer"]:has(.site-masthead) { margin-bottom: 0; }
-  .site-masthead {
-    background: #14191e;
-    color: #f5f7fa;
-    border-bottom: 1px solid #ffffff1a;
-  }
+  .site-masthead { color: #192a34; background: #fff; border-bottom: 1px solid #d8dfe0; }
   .site-masthead-inner {
-    width: min(100% - 96px, 1280px);
+    width: min(calc(100% - clamp(48px, 8vw, 144px)), 1360px);
     margin: 0 auto;
-    min-height: 68px;
+    min-height: 72px;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: space-between;
-    gap: 16px;
+    gap: 14px;
     font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
   }
   .site-masthead-inner a { text-decoration: none; }
-  .site-masthead-inner a:focus-visible { outline: 2px solid #edb568; outline-offset: 3px; }
-  .site-brand { display: flex; align-items: center; gap: 12px; color: #f5f7fa !important; font-size: 17px; font-weight: 700; white-space: nowrap; }
-  .site-brand-mark {
-    display: grid;
-    place-content: center;
-    gap: 4px;
-    width: 34px;
-    height: 34px;
-    border: 1px solid #ffffff3a;
-    background: #242c33;
-    border-radius: 5px;
-  }
-  .site-brand-mark i { width: 16px; height: 2px; transform: skewX(-24deg); background: #dfe7ec; }
-  .site-brand-mark i:first-child { background: #edb568; }
-  .site-products { display: flex; gap: 6px; }
-  .site-products a { color: #d2dbe1 !important; padding: 8px 13px; border-radius: 5px; white-space: nowrap; font-size: 15px; font-weight: 600; }
-  .site-products a:hover { color: #ffe0aa !important; }
-  .site-products a[aria-current="page"] { color: #ffe0aa !important; background: #394149; }
-  @media (max-width: 830px) { .site-masthead-inner { width: calc(100% - 48px); } }
+  .site-masthead-inner a:focus-visible { outline: 3px solid #24749b; outline-offset: -3px; }
+  .site-brand { display: inline-flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 700; color: #182a34 !important; white-space: nowrap; }
+  .site-brand-mark { display: grid; place-content: center; gap: 3px; width: 35px; height: 35px; background: #253640; border-radius: 5px; }
+  .site-brand-mark i { width: 17px; height: 3px; transform: skewX(-26deg); background: #e1e8e9; }
+  .site-brand-mark i:first-child { background: #efb151; }
+  .site-products { display: flex; align-items: stretch; gap: clamp(15px, 2.8vw, 44px); }
+  .site-products a { display: inline-flex; align-items: center; position: relative; white-space: nowrap; padding: 0 2px; color: #4e6069 !important; font-size: 16px; font-weight: 600; }
+  .site-products a:hover, .site-products a[aria-current="page"] { color: #14252f !important; }
+  .site-products a[aria-current="page"]::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #ad7429; }
   @media (max-width: 650px) {
-    .site-masthead-inner { width: calc(100% - 36px); min-height: 61px; gap: 8px; }
-    .site-brand { font-size: 15px; gap: 7px; }
-    .site-brand-mark { width: 27px; height: 27px; gap: 3px; }
-    .site-products { gap: 1px; }
-    .site-products a { padding: 8px 7px; font-size: 14px; }
-  }
-  @media (max-width: 345px) {
-    .site-masthead-inner { flex-wrap: wrap; padding: 10px 0; }
+    .site-masthead-inner { width: calc(100% - 36px); min-height: 56px; gap: 6px; }
+    .site-brand { gap: 7px; font-size: 15px; }
+    .site-brand-mark { width: 27px; height: 27px; gap: 2px; }
+    .site-brand-mark i { width: 14px; }
+    .site-products { gap: 12px; }
+    .site-products a { font-size: 14px; }
   }
 </style>
 <header class="site-masthead">
