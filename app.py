@@ -1,4 +1,4 @@
-"""Streamlit entry point for the plate storage product site."""
+"""Streamlit entry point for the storage systems product site."""
 
 from base64 import b64encode
 from pathlib import Path
@@ -6,7 +6,9 @@ from pathlib import Path
 import streamlit as st
 from streamlit.components.v1 import html as legacy_iframe
 
-st.set_page_config(page_title="板材存放库 | Plate Storage System", layout="wide")
+product = "profiles" if st.query_params.get("product") == "profiles" else "plates"
+page_title = "型材库 | Profile Storage System" if product == "profiles" else "板材存放库 | Plate Storage System"
+st.set_page_config(page_title=page_title, layout="wide")
 st.markdown(
     """
     <style>
@@ -21,10 +23,15 @@ st.markdown(
 )
 
 assets = Path(__file__).resolve().parent / "component"
+header = (assets / "header.html").read_text(encoding="utf-8")
+active_link = f'data-product-link="{product}"'
+st.markdown(header.replace(active_link, f'{active_link} aria-current="page"'), unsafe_allow_html=True)
 page = (assets / "index.html").read_text(encoding="utf-8")
+page = page.replace('<body data-product="plates">', f'<body data-product="{product}">')
+page = page.replace("<title>板材存放库 | Plate Storage System</title>", f"<title>{page_title}</title>")
 styles = (assets / "style.css").read_text(encoding="utf-8")
 page = page.replace('<link rel="stylesheet" href="./style.css">', f"<style>{styles}</style>")
-for filename in ("depth.js", "scene.js", "app.js"):
+for filename in ("depth.js", "scene.js", "profiles.js", "app.js"):
     script = (assets / filename).read_text(encoding="utf-8")
     page = page.replace(f'<script src="./{filename}"></script>', f"<script>{script}</script>")
 for image in (assets / "media").glob("*.webp"):

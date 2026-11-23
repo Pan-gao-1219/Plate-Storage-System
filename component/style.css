@@ -17,30 +17,27 @@ a { color: inherit; text-decoration: none; }
 a:focus-visible, button:focus-visible { outline: 2px solid #d79439; outline-offset: 4px; }
 
 .shell { width: min(100% - 96px, 1280px); margin: 0 auto; }
-.masthead { background: #14191e; color: #f5f7fa; border-bottom: 1px solid #ffffff1a; }
-.masthead-inner, .footer-inner {
+.footer-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
   min-height: 68px;
 }
-.brand { display: flex; gap: 12px; align-items: center; font-size: 17px; font-weight: 700; white-space: nowrap; }
-.brand-icon {
-  display: grid;
-  gap: 4px;
-  place-content: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid #ffffff3a;
-  border-radius: 5px;
-  background: #242c33;
+.footer a:hover { color: var(--accent); }
+body[data-product="profiles"] .sides { display: none; }
+.profile-preview {
+  display: block;
+  position: relative;
+  aspect-ratio: 2.12;
+  height: auto;
+  cursor: default;
+  touch-action: auto;
+  background: radial-gradient(ellipse at 50% 45%, #344552, #202c36);
 }
-.brand-icon i { width: 16px; height: 2px; transform: skewX(-24deg); background: #dfe7ec; }
-.brand-icon i:first-child { background: var(--accent); }
-.masthead nav { display: flex; gap: 28px; font-size: 15px; font-weight: 550; color: #c8d0d7; }
-.masthead nav a { padding: 9px 0; }
-.masthead nav a:hover, .footer a:hover { color: var(--accent); }
+.system-image .profile-preview { aspect-ratio: 1.72; }
+.profile-stand { background: #ae5f4d; }
+.profile-carrier { background: #bb8948; }
 
 .hero {
   color: #f9fafc;
@@ -238,10 +235,6 @@ progress::-moz-progress-bar { background: #c78a31; border-radius: 4px; }
 }
 @media (max-width: 650px) {
   .shell { width: calc(100% - 36px); }
-  .masthead-inner { min-height: 61px; gap: 12px; }
-  .masthead nav { gap: 13px; font-size: 14px; }
-  .brand { font-size: 15px; gap: 8px; }
-  .brand-icon { width: 28px; height: 28px; gap: 3px; }
   .hero-inner { grid-template-columns: 1fr; padding: 41px 0 25px; gap: 26px; }
   .hero-description { max-width: 540px; }
   .hero-image { max-width: 540px; margin: 0 auto; }

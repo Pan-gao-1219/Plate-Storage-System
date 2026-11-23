@@ -1,0 +1,54 @@
+<style>
+  [data-testid="stMarkdownContainer"]:has(.site-masthead) { margin-bottom: 0; }
+  .site-masthead {
+    background: #14191e;
+    color: #f5f7fa;
+    border-bottom: 1px solid #ffffff1a;
+  }
+  .site-masthead-inner {
+    width: min(100% - 96px, 1280px);
+    margin: 0 auto;
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  }
+  .site-masthead-inner a { text-decoration: none; }
+  .site-masthead-inner a:focus-visible { outline: 2px solid #edb568; outline-offset: 3px; }
+  .site-brand { display: flex; align-items: center; gap: 12px; color: #f5f7fa !important; font-size: 17px; font-weight: 700; white-space: nowrap; }
+  .site-brand-mark {
+    display: grid;
+    place-content: center;
+    gap: 4px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #ffffff3a;
+    background: #242c33;
+    border-radius: 5px;
+  }
+  .site-brand-mark i { width: 16px; height: 2px; transform: skewX(-24deg); background: #dfe7ec; }
+  .site-brand-mark i:first-child { background: #edb568; }
+  .site-products { display: flex; gap: 6px; }
+  .site-products a { color: #d2dbe1 !important; padding: 8px 13px; border-radius: 5px; white-space: nowrap; font-size: 15px; font-weight: 600; }
+  .site-products a:hover { color: #ffe0aa !important; }
+  .site-products a[aria-current="page"] { color: #ffe0aa !important; background: #394149; }
+  @media (max-width: 830px) { .site-masthead-inner { width: calc(100% - 48px); } }
+  @media (max-width: 650px) {
+    .site-masthead-inner { width: calc(100% - 36px); min-height: 61px; gap: 8px; }
+    .site-brand { font-size: 15px; gap: 7px; }
+    .site-brand-mark { width: 27px; height: 27px; gap: 3px; }
+    .site-products { gap: 1px; }
+    .site-products a { padding: 8px 7px; font-size: 14px; }
+  }
+  @media (max-width: 345px) {
+    .site-masthead-inner { flex-wrap: wrap; padding: 10px 0; }
+  }
+</style>
+<header class="site-masthead">
+  <div class="site-masthead-inner">
+    <a class="site-brand" href="?product=plates" target="_self" aria-label="存放系统首页"><span class="site-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>工业存放系统</span></a>
+    <nav class="site-products" aria-label="产品导航"><a href="?product=plates" target="_self" data-product-link="plates">板材存放库</a><a href="?product=profiles" target="_self" data-product-link="profiles">型材库</a></nav>
+  </div>
+</header>

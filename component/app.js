@@ -1,11 +1,13 @@
 "use strict";
 
-const alignEnd = 1.8, transferEnd = 4.1, craneEnd = 7.3, returnEnd = 9.25, cycleEnd = 10.7;
+const isProfile = document.body.dataset.product === "profiles";
+const alignEnd = 1.8, transferEnd = 4.1, craneEnd = 7.3, returnEnd = 9.25;
 const liftOff = 5.15, setDown = 6.23;
-const stepEnds = [alignEnd, transferEnd, craneEnd, returnEnd, cycleEnd];
+const stepEnds = isProfile ? profileStepEnds : [alignEnd, transferEnd, craneEnd, returnEnd, 10.7];
+const cycleEnd = stepEnds.at(-1);
 const alignStep = ["升降对层", "中央升降架对齐目标层。"];
 const resetStep = ["平台复位", "升降架回到起始高度。"];
-const modes = {
+const plateModes = {
   take: {
     title: "取板",
     steps: [
@@ -27,10 +29,14 @@ const modes = {
     ],
   },
 };
-const initialRack = () => GEOMETRY.heights.map((_, index, heights) => index < heights.length - 1);
-const initialStock = () => ({ left: initialRack(), right: initialRack() });
+const modes = isProfile ? profileModes : plateModes;
+const layerHeights = isProfile ? profileGeometry.heights : GEOMETRY.heights;
+const cargo = isProfile ? "型材" : "板材";
+const occupiedLabel = isProfile ? "有料" : "有板";
+const initialRack = () => layerHeights.map((_, index) => index < layerHeights.length - 1);
+const initialStock = () => isProfile ? { rack: initialRack() } : { left: initialRack(), right: initialRack() };
 const sideLabel = side => side === "left" ? "左库" : "右库";
-const locationLabel = ({ side, index }) => `${sideLabel(side)}第 ${index + 1} 层`;
+const locationLabel = ({ side, index }) => `${isProfile ? "" : sideLabel(side)}第 ${index + 1} 层`;
 const stepIndex = time => stepEnds.findIndex(end => time < end);
 const smooth = (time, start, end) => {
   const portion = Math.min(1, Math.max(0, (time - start) / (end - start)));
@@ -38,7 +44,7 @@ const smooth = (time, start, end) => {
 };
 
 const canvas = document.getElementById("scene");
-const scene = new Scene(canvas);
+const scene = isProfile ? new ProfileScene(canvas) : new Scene(canvas);
 const sideButtons = [...document.querySelectorAll("[data-side]")];
 const modeButtons = [...document.querySelectorAll("[data-mode]")];
 const levels = document.getElementById("levels");
@@ -54,7 +60,7 @@ const status = document.getElementById("status");
 const detail = document.getElementById("detail");
 
 let stock = initialStock();
-let side = "left";
+let side = isProfile ? "rack" : "left";
 let mode = "take";
 let job = null;
 let lastJob = null;
@@ -63,6 +69,7 @@ let animationFrame = null;
 let previousTime = null;
 
 function readScene() {
+  if (isProfile) return readProfileScene(stock, job, highlight);
   const base = { stock, highlight, liftZ: GEOMETRY.heights[0] };
   if (!job) return base;
 
@@ -102,7 +109,7 @@ function renderScene() {
   scene.render(readScene());
 }
 
-const levelButtons = GEOMETRY.heights.map((_, index) => {
+const levelButtons = layerHeights.map((_, index) => {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "level";
@@ -136,8 +143,8 @@ function updateUI() {
   const eligible = placing ? slots.length - loaded : loaded;
   const { title, steps } = modes[mode];
   const currentStep = job ? stepIndex(job.time) : -1;
-  remaining.textContent = `有板 ${loaded} · 空层 ${slots.length - loaded}`;
-  fieldHint.textContent = placing ? "点选空层放板。层位从下往上编号。" : "点选有板层位取板。层位从下往上编号。";
+  remaining.textContent = `${occupiedLabel} ${loaded} · 空层 ${slots.length - loaded}`;
+  fieldHint.textContent = `点选${placing ? "空层" : occupiedLabel + "层位"}${title}。层位从下往上编号。`;
   for (const button of modeButtons) {
     button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
     button.disabled = Boolean(job);
@@ -152,7 +159,7 @@ function updateUI() {
     button.disabled = Boolean(job) || occupied === placing;
     button.classList.toggle("is-current", isCurrent);
     button.classList.toggle("is-empty", !occupied);
-    label.textContent = isCurrent ? `${title}中` : occupied ? "有板" : "空层";
+    label.textContent = isCurrent ? `${title}中` : occupied ? occupiedLabel : "空层";
     button.setAttribute("aria-label", `${locationLabel({ side, index })}，${label.textContent}`);
   }
 
@@ -164,13 +171,13 @@ function updateUI() {
   } else if (lastJob) {
     statusDot.dataset.state = "complete";
     status.textContent = `${title}完成`;
-    detail.textContent = `${locationLabel(lastJob)}板材已${placing ? "放入" : "取出"}，设备已复位。`;
+    detail.textContent = `${locationLabel(lastJob)}${cargo}已${placing ? "放入" : "取出"}，设备已复位。`;
   } else {
     statusDot.dataset.state = "idle";
-    status.textContent = eligible ? "等待选层" : placing ? "当前货架已满" : "当前货架无板";
+    status.textContent = eligible ? "等待选层" : placing ? "当前货架已满" : `当前货架无${cargo}`;
     detail.textContent = eligible
       ? `选择层位，开始${title}演示。`
-      : placing ? "可以切换货架，或先取出一块板材。" : "可以切换货架，或先放入一块板材。";
+      : `${isProfile ? "请" : "可以切换货架，或"}先${placing ? "取出" : "放入"}${cargo}。`;
   }
 
   pauseButton.disabled = !job;
@@ -289,12 +296,17 @@ new ResizeObserver(renderScene).observe(canvas);
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 for (const link of document.querySelectorAll('a[href^="#"]')) {
   link.addEventListener("click", event => {
-    const section = document.getElementById(link.hash.slice(1));
+    const siteHeader = link.hash === "#top"
+      ? window.frameElement?.ownerDocument.querySelector(".site-masthead")
+      : null;
+    const section = siteHeader || document.getElementById(link.hash.slice(1));
     if (!section) return;
     event.preventDefault();
     section.scrollIntoView({ behavior: reducedMotion.matches ? "instant" : "smooth", block: "start" });
   });
 }
+
+if (isProfile) showProfilePreviews(stock);
 
 // Fit the Streamlit iframe to its content when the host permits same-origin access.
 const hostFrame = window.frameElement;
