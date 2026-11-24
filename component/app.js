@@ -60,6 +60,7 @@ const status = document.getElementById("status");
 const detail = document.getElementById("detail");
 
 let stock = initialStock();
+let profileBarIndex = 0;
 let side = isProfile ? "rack" : "left";
 let mode = "take";
 let job = null;
@@ -69,7 +70,7 @@ let animationFrame = null;
 let previousTime = null;
 
 function readScene() {
-  if (isProfile) return readProfileScene(stock, job, highlight);
+  if (isProfile) return readProfileScene(stock, job, highlight, profileBarIndex);
   const base = { stock, highlight, liftZ: GEOMETRY.heights[0] };
   if (!job) return base;
 
@@ -145,6 +146,7 @@ function updateUI() {
   const currentStep = job ? stepIndex(job.time) : -1;
   remaining.textContent = `${occupiedLabel} ${loaded} · 空层 ${slots.length - loaded}`;
   fieldHint.textContent = `点选${placing ? "空层" : occupiedLabel + "层位"}${title}。层位从下往上编号。`;
+  if (isProfile && !job) fieldHint.textContent += `横杆在第 ${profileBarIndex + 1} 层。`;
   for (const button of modeButtons) {
     button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
     button.disabled = Boolean(job);
@@ -171,7 +173,8 @@ function updateUI() {
   } else if (lastJob) {
     statusDot.dataset.state = "complete";
     status.textContent = `${title}完成`;
-    detail.textContent = `${locationLabel(lastJob)}${cargo}已${placing ? "放入" : "取出"}，设备已复位。`;
+    const result = `${locationLabel(lastJob)}${cargo}已${placing ? "放入" : "取出"}`;
+    detail.textContent = isProfile ? `${result}，横杆留在该层。` : `${result}，设备已复位。`;
   } else {
     statusDot.dataset.state = "idle";
     status.textContent = eligible ? "等待选层" : placing ? "当前货架已满" : `当前货架无${cargo}`;
@@ -211,6 +214,7 @@ function tick(now) {
   previousTime = now;
   if (job.time >= cycleEnd) {
     stock[job.side][job.index] = job.mode === "place";
+    if (isProfile) profileBarIndex = job.index;
     lastJob = job;
     job = null;
     stopAnimation();
@@ -260,6 +264,7 @@ pauseButton.addEventListener("click", () => {
 resetButton.addEventListener("click", () => {
   stopAnimation();
   stock = initialStock();
+  profileBarIndex = 0;
   job = null;
   lastJob = null;
   highlight = null;
@@ -312,7 +317,7 @@ const galleryCaption = document.querySelector(".gallery-caption");
 const galleryButtons = document.querySelectorAll("[data-gallery]");
 const galleryImages = document.querySelectorAll(".hero-media [data-pose]");
 const galleryCopy = isProfile
-  ? { overview: "五层型材架与架外支承", lift: "行车在架外整体吊起活动架与型材" }
+  ? { overview: "型材分层存放在活动架上", transfer: "行车提起前端，沿滚轮外拖", lift: "活动架落在横杆上，行车单独吊走型材" }
   : { overview: "两侧固定货架与中央升降架", lift: "行车吊起钢板，活动架留在中央工位" };
 
 function selectGalleryPose(pose) {

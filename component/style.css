@@ -267,6 +267,8 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
   .footer-english { display: block; margin: 3px 0 0; }
 }
 @media (max-width: 470px) {
+  body[data-product="profiles"] .gallery-bar { display: grid; gap: 4px; padding: 9px 12px 6px; }
+  body[data-product="profiles"] .gallery-controls { display: grid; grid-template-columns: repeat(3, 1fr); }
   .viewer-header, .viewer-footer { padding-left: 12px; padding-right: 12px; }
   .legend { column-gap: 10px; }
   .drag-hint { display: none; }
