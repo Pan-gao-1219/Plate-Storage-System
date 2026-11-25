@@ -106,6 +106,32 @@ body[data-product="profiles"] .components > div:nth-child(2) dt::before { backgr
 body[data-product="profiles"] .components > div:nth-child(3) dt::before { background: #ae5f4d; }
 .components dd { padding-left: 30px; color: var(--muted); font-size: 16px; line-height: 1.7; margin-top: 6px; }
 .demo-note { margin-top: 14px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+.patent-section { padding: clamp(44px, 5vw, 80px) 0; border-top: 1px solid var(--line); background: #edf1f0; }
+.patent-layout { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); gap: clamp(30px, 5vw, 84px); }
+.patent-intro h2 { font-size: clamp(28px, 2.9vw, 46px); line-height: 1.16; letter-spacing: -.035em; }
+.patent-name { margin-top: 22px; font-size: clamp(19px, 1.7vw, 26px); font-weight: 650; }
+.patent-type { margin-top: 7px; color: var(--muted); font-size: 15px; line-height: 1.65; }
+.patent-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+.patent-facts dt { color: var(--muted); font-size: 14px; }
+.patent-facts dd { margin-top: 4px; font-size: 16px; line-height: 1.55; font-weight: 600; }
+.patent-id { font-variant-numeric: tabular-nums; }
+.patent-proof { margin-top: 24px; background: #fafbf9; border: 1px solid #c3cfd1; border-radius: 8px; }
+.patent-proof summary { display: flex; align-items: center; gap: 16px; padding: 12px 18px; list-style: none; cursor: pointer; border-radius: inherit; }
+.patent-proof summary::-webkit-details-marker { display: none; }
+.patent-proof summary:hover { background: #fff; }
+.patent-proof summary:focus-visible { outline: 3px solid #24749b; outline-offset: 3px; }
+.patent-thumb { flex: none; width: 48px; border: 1px solid #cbd2d3; }
+.patent-proof-label { font-size: 16px; font-weight: 650; }
+.patent-toggle { display: inline-flex; flex: none; align-items: center; gap: 9px; margin-left: auto; font-size: 14px; color: #394e5a; }
+.patent-toggle i { width: 8px; height: 8px; border-right: 2px solid; border-bottom: 2px solid; transform: translateY(-2px) rotate(45deg); }
+.patent-proof[open] .patent-toggle i { transform: translateY(2px) rotate(225deg); }
+.patent-proof .when-open, .patent-proof[open] .when-closed { display: none; }
+.patent-proof[open] .when-open { display: inline; }
+.patent-proof figure { padding: clamp(8px, 1vw, 16px); border-top: 1px solid var(--line); }
+.patent-full { width: 100%; }
+.patent-proof figcaption { padding-top: 8px; text-align: center; color: var(--muted); font-size: 13px; }
+
 .footer { color: #edf3f5; background: #202c34; font-size: 15px; }
 .footer-inner { min-height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .footer-english { font-family: "Bahnschrift", "Segoe UI", sans-serif; margin-left: 12px; color: #b9c7cd; }
@@ -237,6 +263,8 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
 }
 
 @media (max-width: 830px) {
+  .patent-layout { grid-template-columns: 1fr; gap: 24px; }
+  .patent-name { margin-top: 14px; }
   .hero-inner { grid-template-columns: minmax(0, .8fr) minmax(0, 1.18fr); gap: 24px; }
   .hero h1 { font-size: clamp(39px, 6.1vw, 50px); }
   .specs > div { flex-direction: column; }
@@ -267,6 +295,13 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
   .footer-english { display: block; margin: 3px 0 0; }
 }
 @media (max-width: 470px) {
+  .hero-actions { column-gap: 14px; }
+  .patent-facts { grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--line); }
+  .patent-facts > div { display: grid; grid-template-columns: 5em 1fr; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .patent-facts dd { margin-top: 0; font-size: 15px; }
+  .patent-proof summary { gap: 10px; padding: 9px 12px; }
+  .patent-thumb { width: 36px; }
+  .patent-proof-label { font-size: 15px; }
   body[data-product="profiles"] .gallery-bar { display: grid; gap: 4px; padding: 9px 12px 6px; }
   body[data-product="profiles"] .gallery-controls { display: grid; grid-template-columns: repeat(3, 1fr); }
   .viewer-header, .viewer-footer { padding-left: 12px; padding-right: 12px; }

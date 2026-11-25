@@ -19,6 +19,7 @@
             <div class="hero-actions">
               <a class="primary-link" href="#demo"><i class="play-icon" aria-hidden="true"></i>操作三维演示</a>
               <a class="detail-link" href="#system">查看结构</a>
+              <a class="detail-link" href="#patent">专利证书</a>
             </div>
           </div>
           <figure class="hero-image">
@@ -131,6 +132,34 @@
               <div><dt>活动架</dt><dd>承托钢板横移至中央工位。取板后空架归层，放板后带板归层。</dd></div>
               <div><dt>液压升降架</dt><dd>升降至目标层，让中央滚轮与货架上的活动架对齐。</dd></div>
             </dl>
+          </div>
+        </div>
+      </section>
+      <section class="patent-section" id="patent" aria-labelledby="patent-title">
+        <div class="shell patent-layout">
+          <header class="patent-intro">
+            <h2 id="patent-title">专利授权</h2>
+            <p class="patent-name">{{patent_name}}</p>
+            <p class="patent-type">国家知识产权局授予的实用新型专利</p>
+          </header>
+          <div class="patent-record">
+            <dl class="patent-facts">
+              <div><dt>专利权人</dt><dd>青岛物探机械工程有限公司</dd></div>
+              <div><dt>授权公告日</dt><dd><time datetime="2026-08-07">2026 年 8 月 7 日</time></dd></div>
+              <div><dt>专利号</dt><dd class="patent-id">{{patent_number}}</dd></div>
+              <div><dt>授权公告号</dt><dd class="patent-id">{{patent_announcement}}</dd></div>
+            </dl>
+            <details class="patent-proof">
+              <summary>
+                <img class="patent-thumb" src="./media/patent-{{product}}-thumb.webp" width="144" height="204" alt="" loading="lazy">
+                <span class="patent-proof-label">实用新型专利证书</span>
+                <span class="patent-toggle"><span class="when-closed">查看大图</span><span class="when-open">收起大图</span><i aria-hidden="true"></i></span>
+              </summary>
+              <figure>
+                <img class="patent-full" src="./media/patent-{{product}}.webp" width="1786" height="2526" loading="lazy" alt="《{{patent_name}}》实用新型专利证书，专利号 {{patent_number}}">
+                <figcaption>证书展示图已隐去详细地址。</figcaption>
+              </figure>
+            </details>
           </div>
         </div>
       </section>
