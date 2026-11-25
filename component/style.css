@@ -134,6 +134,7 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
 
 .about-section { padding-block: clamp(36px, 4vw, 64px); border-top: 1px solid var(--line); background: var(--paper); }
 .about-section p { max-width: 40em; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.85; }
+.company-contact { display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; margin-top: 16px; border-top: 1px solid var(--line); padding-top: 8px; color: var(--muted); font-size: 15px; font-style: normal; }
 
 .footer { color: #edf3f5; background: #202c34; font-size: 15px; }
 .footer-inner { min-height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
