@@ -108,8 +108,8 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
 .demo-note { margin-top: 14px; color: var(--muted); font-size: 14px; line-height: 1.6; }
 
 .patent-section { padding: clamp(44px, 5vw, 80px) 0; border-top: 1px solid var(--line); background: #edf1f0; }
-.patent-layout { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); gap: clamp(30px, 5vw, 84px); }
-.patent-intro h2 { font-size: clamp(28px, 2.9vw, 46px); line-height: 1.16; letter-spacing: -.035em; }
+.patent-layout, .about-section .shell { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); gap: clamp(30px, 5vw, 84px); }
+.patent-intro h2, .about-section h2 { font-size: clamp(28px, 2.9vw, 46px); line-height: 1.16; letter-spacing: -.035em; }
 .patent-name { margin-top: 22px; font-size: clamp(19px, 1.7vw, 26px); font-weight: 650; }
 .patent-type { margin-top: 7px; color: var(--muted); font-size: 15px; line-height: 1.65; }
 .patent-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
@@ -131,6 +131,9 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
 .patent-proof figure { padding: clamp(8px, 1vw, 16px); border-top: 1px solid var(--line); }
 .patent-full { width: 100%; }
 .patent-proof figcaption { padding-top: 8px; text-align: center; color: var(--muted); font-size: 13px; }
+
+.about-section { padding-block: clamp(36px, 4vw, 64px); border-top: 1px solid var(--line); background: var(--paper); }
+.about-section p { max-width: 40em; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.85; }
 
 .footer { color: #edf3f5; background: #202c34; font-size: 15px; }
 .footer-inner { min-height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -263,7 +266,7 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
 }
 
 @media (max-width: 830px) {
-  .patent-layout { grid-template-columns: 1fr; gap: 24px; }
+  .patent-layout, .about-section .shell { grid-template-columns: 1fr; gap: 24px; }
   .patent-name { margin-top: 14px; }
   .hero-inner { grid-template-columns: minmax(0, .8fr) minmax(0, 1.18fr); gap: 24px; }
   .hero h1 { font-size: clamp(39px, 6.1vw, 50px); }
