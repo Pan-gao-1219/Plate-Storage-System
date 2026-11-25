@@ -1,19 +1,23 @@
 "use strict";
 
 const isProfile = document.body.dataset.product === "profiles";
-const alignEnd = 1.8, transferEnd = 4.1, craneEnd = 7.3, returnEnd = 9.25;
-const liftOff = 5.15, setDown = 6.23;
-const stepEnds = isProfile ? profileStepEnds : [alignEnd, transferEnd, craneEnd, returnEnd, 10.7];
-const cycleEnd = stepEnds.at(-1);
+const craneDuration = 3.2;
+const plateStepEnds = GEOMETRY.heights.map((height, index) => {
+  const vertical = index === 0 ? 0 : .8 + .4 * (height - GEOMETRY.heights[0]);
+  let end = 0;
+  return [vertical, 2.3, vertical, craneDuration, vertical, 2.05, vertical].map(duration => end += duration);
+});
 const alignStep = ["升降对层", "中央升降架对齐目标层。"];
-const resetStep = ["平台复位", "升降架回到起始高度。"];
+const resetStep = ["平台复位", "活动架归位后，升降架回到第一层。"];
 const plateModes = {
   take: {
     title: "取板",
     steps: [
       alignStep,
       ["带板横移", "钢板随活动架滑上中央滚轮。"],
-      ["行车吊出", "行车吊走板材，活动架留在中央。"],
+      ["降至一层", "升降架托住活动架和钢板，一起降到第一层。"],
+      ["一层吊出", "平台停稳，行车吊走钢板。"],
+      ["升回原层", "升降架托着空活动架回到原层高度。"],
       ["空架归层", "空活动架返回原层。"],
       resetStep,
     ],
@@ -23,7 +27,9 @@ const plateModes = {
     steps: [
       alignStep,
       ["空架横移", "空活动架滑上中央滚轮。"],
-      ["行车放板", "行车将板材放到活动架上，吊具抬起。"],
+      ["降至一层", "升降架托着空活动架降到第一层。"],
+      ["一层放板", "平台停稳，行车将钢板放上活动架，吊具抬起。"],
+      ["升回目标层", "升降架托着活动架和钢板升回目标层。"],
       ["带板归层", "活动架带板返回目标层。"],
       resetStep,
     ],
@@ -37,8 +43,10 @@ const initialRack = () => layerHeights.map((_, index) => index < layerHeights.le
 const initialStock = () => isProfile ? { rack: initialRack() } : { left: initialRack(), right: initialRack() };
 const sideLabel = side => side === "left" ? "左库" : "右库";
 const locationLabel = ({ side, index }) => `${isProfile ? "" : sideLabel(side)}第 ${index + 1} 层`;
-const stepIndex = time => stepEnds.findIndex(end => time < end);
+const stepEndsFor = index => isProfile ? profileStepEnds : plateStepEnds[index ?? plateStepEnds.length - 1];
+const stepIndex = (ends, time) => ends.findIndex(end => time < end);
 const smooth = (time, start, end) => {
+  if (start === end) return Number(time >= end);
   const portion = Math.min(1, Math.max(0, (time - start) / (end - start)));
   return portion * portion * (3 - 2 * portion);
 };
@@ -52,7 +60,13 @@ const fieldHint = document.getElementById("field-hint");
 const pauseButton = document.getElementById("pause");
 const resetButton = document.getElementById("reset");
 const processHeading = document.getElementById("process-heading");
-const stepLabels = [...document.querySelectorAll("#steps li")];
+const stepList = document.getElementById("steps");
+const stepLabels = modes.take.steps.map(() => {
+  const item = document.createElement("li");
+  item.append(document.createElement("span"), document.createElement("small"));
+  stepList.append(item);
+  return item;
+});
 const remaining = document.getElementById("remaining");
 const progress = document.getElementById("progress");
 const statusDot = document.getElementById("status-dot");
@@ -78,31 +92,39 @@ function readScene() {
   const placing = job.mode === "place";
   const sourceX = GEOMETRY.rackX[source];
   const levelZ = GEOMETRY.heights[index];
+  const [alignEnd, transferEnd, lowerEnd, craneEnd, raiseEnd, returnEnd, parkEnd] = plateStepEnds[index];
   const transfer = smooth(time, alignEnd, transferEnd);
-  const returnTray = smooth(time, craneEnd, returnEnd);
+  const returnTray = smooth(time, raiseEnd, returnEnd);
   const trayX = sourceX * (1 - transfer + returnTray);
-  const craneTravel = placing ? 1 - smooth(time, transferEnd, 5.2) : smooth(time, 6.18, craneEnd);
-  const onTray = placing ? time >= setDown : time <= liftOff;
-  const boardLift = onTray ? 0 : 6.6 * craneTravel + 2.4 * (
-    placing ? 1 - smooth(time, 5.16, setDown) : smooth(time, liftOff, 6.18)
+  const stroke = levelZ - base.liftZ;
+  const liftZ = base.liftZ + stroke * (
+    smooth(time, 0, alignEnd) - smooth(time, transferEnd, lowerEnd)
+    + smooth(time, craneEnd, raiseEnd) - smooth(time, returnEnd, parkEnd)
   );
+  // Outside the central bay the rack supports the tray at the selected level.
+  const trayZ = time >= transferEnd && time < raiseEnd ? liftZ : levelZ;
+  const craneTime = time - lowerEnd;
+  const craneTravel = placing ? 1 - smooth(craneTime, 0, 1.1) : smooth(craneTime, 2.08, craneDuration);
+  const onTray = placing ? craneTime >= 2.13 : craneTime <= 1.05;
+  const boardLift = onTray ? 0 : 6.6 * craneTravel + 2.4 * (placing
+    ? 1 - smooth(craneTime, 1.1, 2.13) : smooth(craneTime, 1.05, 2.08));
   const hoistClearance = placing
-    ? 10.4 * smooth(time, 6.38, craneEnd)
-    : 7.2 * (1 - smooth(time, transferEnd + .18, 5.08));
-  const liftTravel = (levelZ - base.liftZ) * smooth(time, 0, 1.56);
+    ? 10.4 * smooth(craneTime, 2.28, craneDuration)
+    : 7.2 * (1 - smooth(craneTime, .18, .98));
   return {
     ...base,
     target: job,
     levelZ,
-    liftZ: base.liftZ + liftTravel * (1 - smooth(time, returnEnd, cycleEnd)),
+    liftZ,
     trayX,
+    trayZ,
     boardX: onTray ? trayX : 0,
     boardY: onTray ? 0 : 9 * craneTravel,
     boardLift,
-    boardVisible: placing ? time >= transferEnd : time < craneEnd,
-    crane: time >= transferEnd && time < craneEnd,
-    craneZ: levelZ + GEOMETRY.plateBase + GEOMETRY.plateThickness + boardLift + hoistClearance,
-    alignGuide: time >= 1.04 && time < alignEnd + .32,
+    boardVisible: placing ? time >= lowerEnd : time < craneEnd,
+    crane: time >= lowerEnd && time < craneEnd,
+    craneZ: base.liftZ + GEOMETRY.plateBase + GEOMETRY.plateThickness + boardLift + hoistClearance,
+    alignGuide: time >= alignEnd && time < alignEnd + .32,
   };
 }
 
@@ -143,7 +165,8 @@ function updateUI() {
   const placing = mode === "place";
   const eligible = placing ? slots.length - loaded : loaded;
   const { title, steps } = modes[mode];
-  const currentStep = job ? stepIndex(job.time) : -1;
+  const ends = stepEndsFor(job?.index ?? lastJob?.index);
+  const currentStep = job ? stepIndex(ends, job.time) : -1;
   remaining.textContent = `${occupiedLabel} ${loaded} · 空层 ${slots.length - loaded}`;
   fieldHint.textContent = `点选${placing ? "空层" : occupiedLabel + "层位"}${title}。层位从下往上编号。`;
   if (isProfile && !job) fieldHint.textContent += `横杆在第 ${profileBarIndex + 1} 层。`;
@@ -187,6 +210,7 @@ function updateUI() {
   pauseButton.textContent = job?.paused ? "继续演示" : "暂停演示";
   processHeading.textContent = `${title}流程`;
   for (const [index, item] of stepLabels.entries()) {
+    item.hidden = ends[index] === (ends[index - 1] ?? 0);
     const current = currentStep === index;
     const done = index < currentStep || (!job && lastJob);
     item.dataset.state = current ? "current" : done ? "done" : "waiting";
@@ -196,8 +220,8 @@ function updateUI() {
     else item.removeAttribute("aria-current");
   }
 
-  progress.max = cycleEnd;
-  progress.value = job?.time ?? (lastJob ? cycleEnd : 0);
+  progress.max = ends.at(-1);
+  progress.value = job?.time ?? (lastJob ? progress.max : 0);
 }
 
 function stopAnimation() {
@@ -209,10 +233,11 @@ function stopAnimation() {
 function tick(now) {
   animationFrame = null;
   if (!job || job.paused) return;
-  const before = stepIndex(job.time);
+  const ends = stepEndsFor(job.index);
+  const before = stepIndex(ends, job.time);
   if (previousTime !== null) job.time += Math.min((now - previousTime) / 1000, .1);
   previousTime = now;
-  if (job.time >= cycleEnd) {
+  if (job.time >= ends.at(-1)) {
     stock[job.side][job.index] = job.mode === "place";
     if (isProfile) profileBarIndex = job.index;
     lastJob = job;
@@ -220,7 +245,7 @@ function tick(now) {
     stopAnimation();
     updateUI();
   } else {
-    if (stepIndex(job.time) !== before) updateUI();
+    if (stepIndex(ends, job.time) !== before) updateUI();
     progress.value = job.time;
     animationFrame = requestAnimationFrame(tick);
   }
@@ -318,7 +343,7 @@ const galleryButtons = document.querySelectorAll("[data-gallery]");
 const galleryImages = document.querySelectorAll(".hero-media [data-pose]");
 const galleryCopy = isProfile
   ? { overview: "型材分层存放在活动架上", transfer: "行车提起前端，沿滚轮外拖", lift: "活动架落在横杆上，行车单独吊走型材" }
-  : { overview: "两侧固定货架与中央升降架", lift: "行车吊起钢板，活动架留在中央工位" };
+  : { overview: "两侧固定货架与中央升降架", lift: "行车在第一层吊走钢板，活动架留在升降架上" };
 
 function selectGalleryPose(pose) {
   for (const image of galleryImages) image.hidden = image.dataset.pose !== pose;

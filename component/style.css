@@ -251,7 +251,8 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
 .actions button:disabled { color: #687983; background: #f2f5f6; border-color: #dce3e6; }
 
 .process { margin-top: 18px; padding: clamp(16px, 1.8vw, 23px); }
-.process ol { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; list-style: none; padding: 0; margin-top: 16px; }
+.process ol { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 5px; list-style: none; padding: 0; margin-top: 16px; }
+.process li[hidden] { display: none; }
 .process li { padding: 11px 12px 8px; border-top: 3px solid #d5dfe5; }
 .process li span { display: block; color: #2c414f; font-size: 15px; font-weight: 650; }
 .process li small { display: block; font-size: 13px; color: #50636f; line-height: 1.55; margin-top: 4px; }
@@ -275,7 +276,7 @@ body[data-product="profiles"] .components > div:nth-child(3) dt::before { backgr
   .workspace { grid-template-columns: 1fr; gap: 12px; }
   .stage { min-height: clamp(230px, 50vw, 360px); }
   .process { margin-top: 12px; }
-  .process ol { grid-template-columns: repeat(auto-fit, minmax(min(100%, 124px), 1fr)); }
+  .process ol { grid-auto-flow: row; grid-template-columns: repeat(auto-fit, minmax(min(100%, 124px), 1fr)); }
 }
 @media (max-width: 650px) {
   :root { --shell: calc(100% - 36px); }

@@ -139,13 +139,14 @@ function addReceiverRollers(mesh, y, z, centerX = 0, offsets = plateRollerOffset
 }
 
 function addLift(mesh, z) {
-  for (const x of GEOMETRY.cylinders) {
-    addBox(mesh, x, 0, .039, .51, .51, .078, "rail");
-    addCylinder(mesh, x, 0, .078, .295, .16, "rack");
-    addCylinder(mesh, x, 0, .292, z - .215, .082, "piston");
-    addBox(mesh, x, 0, z - .192, .26, .31, .103, "rack");
-  }
+  const railBottom = z - .158 - .18 / 2;
   for (const y of [-.84, .84]) {
+    for (const x of GEOMETRY.cylinders) {
+      addBox(mesh, x, y, .039, .51, .51, .078, "rail");
+      addCylinder(mesh, x, y, .078, .205, .16, "rack");
+      addCylinder(mesh, x, y, .205, railBottom - .046, .082, "piston");
+      addBox(mesh, x, y, railBottom - .023, .26, .31, .046, "rack");
+    }
     addBox(mesh, 0, y, z - .158, 9.08, .13, .18, "lift");
     for (const x of [-4.28, 4.28]) {
       addBox(mesh, x, y + Math.sign(y) * .069, z - .109, .30, .015, .069, "marker");
@@ -234,8 +235,8 @@ class Scene {
     }
     addLift(mesh, state.liftZ);
     if (state.target) {
-      addTray(mesh, state.trayX, state.levelZ, true);
-      if (state.boardVisible) addPlate(mesh, state.boardX, state.boardY, state.levelZ + state.boardLift);
+      addTray(mesh, state.trayX, state.trayZ, true);
+      if (state.boardVisible) addPlate(mesh, state.boardX, state.boardY, state.trayZ + state.boardLift);
     }
     if (state.crane) addSpreader(mesh, state.boardY, state.craneZ);
     return mesh;
